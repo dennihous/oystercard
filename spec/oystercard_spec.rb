@@ -22,4 +22,16 @@ describe Oystercard do
       subject.top_up(Oystercard::MAX_BALANCE + 5)
     end.to raise_error("Exceeded max balance")
   end
+
+  it "should not raise and error when top_up results in less than #{Oystercard::MAX_BALANCE} balance" do
+    expect do
+      subject.top_up(Oystercard::MAX_BALANCE)
+    end.not_to raise_error
+  end
+
+  it 'should decrease the balance by 5 when deduct(5) is implemented' do
+    subject.top_up(10)
+    subject.deduct(5)
+    expect(subject.balance).to eq(5)
+  end
 end
