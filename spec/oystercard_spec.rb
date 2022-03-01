@@ -33,44 +33,63 @@ describe Oystercard do
   end
 
   describe "testing :touch_in method" do
+    let(:station){ double :station }
     it "should respond to :touch_in" do
       expect(subject).to respond_to(:touch_in)
     end
 
     it "should raise an error if min balance hasn't been met" do
-      expect{ subject.touch_in }.to raise_error("Please top up, not enough money")
+      expect{ subject.touch_in(station) }.to raise_error("Please top up, not enough money")
     end
 
     it "should not raise an error if balance is above minimum balance" do
       subject.top_up(1)
-      expect{ subject.touch_in }.not_to raise_error
+      expect{ subject.touch_in(station) }.not_to raise_error
     end
 
     it "should not be able to :touch_in if in_journey?" do
       subject.top_up(5)
-      subject.touch_in
-      expect{ subject.touch_in }.to raise_error("You have already touched in")
+      subject.touch_in(station)
+      expect{ subject.touch_in(station) }.to raise_error("You have already touched in")
+    end
+
+    it "should remember the entry station" do
+      subject.top_up(5)
+      subject.touch_in(station)
+      expect(subject.entry_station).to eq station
     end
 
   end
 
   describe "testing :touch_out method" do
+    before do
+      subject.top_up(5)
+    end
+
+    let(:station){ double :station }
     it "should respond to :touch_out" do
       expect(subject).to respond_to(:touch_out)
     end
 
     it "should deduct the fare of £1 from the balance when calling :touch_out" do
-      subject.top_up(5)
-      subject.touch_in
+      subject.touch_in(station)
       expect{ subject.touch_out }.to change{subject.balance}.by(-1)
     end
 
     it "should raise an error if :touch_out is called before :touch_in" do
       expect{ subject.touch_out }.to raise_error("You have not touched in")
     end
+
+    it "should make entry_station return nil after touch_out" do
+      subject.touch_in(station)
+      subject.touch_out
+      expect(subject.entry_station).to be_nil
+    end
+
   end
 
   describe "testing the :in_journey? method" do
+     let(:station){ double :station }
     it "should respond to :in_journey?" do
       expect(subject).to respond_to(:in_journey?)
     end
@@ -85,13 +104,13 @@ describe Oystercard do
 
     it "should be in a journey when a card is touched in" do
       subject.top_up(1)
-      subject.touch_in
+      subject.touch_in(station)
       expect(subject).to be_in_journey
     end
 
     it "should revert to not being in a journey once touched out" do
       subject.top_up(1)
-      subject.touch_in
+      subject.touch_in(station)
       subject.touch_out
       expect(subject).not_to be_in_journey
     end
