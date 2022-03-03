@@ -33,7 +33,6 @@ describe Oystercard do
         subject.top_up(Oystercard::MAX_BALANCE)
       end.not_to raise_error
     end
-
   end
 
   describe "testing :touch_in method" do
@@ -49,18 +48,6 @@ describe Oystercard do
     it "should not raise an error if balance is above minimum balance" do
       subject.top_up(1)
       expect{ subject.touch_in(entry_station) }.not_to raise_error
-    end
-
-    it "should not be able to :touch_in if in_journey?" do
-      subject.top_up(5)
-      subject.touch_in(entry_station)
-      expect{ subject.touch_in(entry_station) }.to raise_error("You have already touched in")
-    end
-
-    it "should remember the entry station" do
-      subject.top_up(5)
-      subject.touch_in(entry_station)
-      expect(subject.entry_station).to eq entry_station
     end
 
   end
@@ -79,10 +66,6 @@ describe Oystercard do
       expect{ subject.touch_out(exit_station) }.to change{subject.balance}.by(-1)
     end
 
-    it "should raise an error if :touch_out is called before :touch_in" do
-      expect{ subject.touch_out(exit_station) }.to raise_error("You have not touched in")
-    end
-
     it "should make entry_station return nil after touch_out" do
       subject.touch_in(entry_station)
       subject.touch_out(exit_station)
@@ -90,45 +73,16 @@ describe Oystercard do
     end
 
     it "logs the completed journey" do
-      allow(Time).to receive(:now).and_return(:start_time)
       subject.touch_in(entry_station)
       subject.touch_out(exit_station)
-      expect(subject.journey_history).to eq({ start_time: [entry_station, exit_station]})
+      expect(subject.journey_history).to eq([[entry_station, exit_station]])
     end
 
   end
 
-  describe "testing the :in_journey? method" do
-    it "should respond to :in_journey?" do
-      expect(subject).to respond_to(:in_journey?)
-    end
-
-    it "should return a boolean value" do
-      expect(subject.in_journey?).to eq(true).or eq(false)
-    end
-
-    it "should not be in a journey when a new card is created" do
-      expect(subject).not_to be_in_journey
-    end
-
-    it "should be in a journey when a card is touched in" do
-      subject.top_up(1)
-      subject.touch_in(entry_station)
-      expect(subject).to be_in_journey
-    end
-
-    it "should revert to not being in a journey once touched out" do
-      subject.top_up(1)
-      subject.touch_in(entry_station)
-      subject.touch_out(exit_station)
-      expect(subject).not_to be_in_journey
-    end
-
-  end
   describe "#initalize" do
     it "should return an empty array before touching in" do
       expect(subject.journey_history).to be_empty
     end
   end
-  
 end
