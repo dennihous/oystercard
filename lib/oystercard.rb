@@ -31,6 +31,7 @@ class Oystercard
   end
 
   private
+
   def log_journey
     journey_history << [@journey.entry_station, @journey.exit_station]
   end

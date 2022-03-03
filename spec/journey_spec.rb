@@ -42,9 +42,7 @@ describe Journey do
       it "should return false if exit_station is nil" do
         expect(subject.journey_finished?).to eq false    
       end
-      
     end
-    
   end
 
   describe "#fare" do
@@ -52,12 +50,9 @@ describe Journey do
     it "should return MINIMUM_FARE when #journey_finished? is true" do
       subject.end_journey(exit_station)
       expect(subject.fare).to eq(Journey::MINIMUM_FARE)
-
     end
     it "should return PENALTY_FARE when #journey_finished? is false" do
       expect(subject.fare).to eq(Journey::PENALTY_FARE)
     end
-
   end
-  
 end
